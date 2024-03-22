@@ -17,7 +17,6 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
     validate: {
       validator: (v: string) => /\S+@\S+\.\S+/.test(v),
       message: (props: { value: string }) => `${props.value} is not a valid email address!`,
