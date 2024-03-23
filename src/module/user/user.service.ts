@@ -24,52 +24,51 @@ export class UsersService {
   }
 
 
-  async findAllUsers(page: number = 1, limit: any = 10, fromDate: Date = null, toDate: Date = null): Promise<{ users: any[], total: number }> {
-    const pipeline = [];
-
-    const parsedLimit = parseInt(limit, 10);
-
-    const formattedFromDate = this.formatDate(fromDate); // Format fromDate
-    const formattedToDate = this.formatDate(toDate); // Format toDat
-
-    if (formattedFromDate && formattedToDate) {
-      pipeline.push({ $match: { dateOfBirth: { $gte: formattedFromDate, $lte: formattedToDate } } });
-    } else if (formattedFromDate) {
-      pipeline.push({ $match: { dateOfBirth: { $gte: formattedFromDate } } });
-    } else if (formattedToDate) {
-      pipeline.push({ $match: { dateOfBirth: { $lte: formattedToDate } } });
+  async findAllUsers(
+    page: number = 1,
+    limit: any = 10,
+    fromDate: Date = null,
+    toDate: Date = null
+  ): Promise<{ users: any[], total: number }> {
+    const query: any = {};
+  
+    if (fromDate && toDate) {
+      query.dateOfBirth = { $gte: new Date(fromDate), $lte: new Date(toDate) };
+    } else if (fromDate) {
+      query.dateOfBirth = { $gte: new Date(fromDate) };
+    } else if (toDate) {
+      query.dateOfBirth = { $lte: new Date(toDate) };
     }
-
-    pipeline.push(
-      { $facet: {
-          users: [
-            { $skip: (page - 1) * parsedLimit },
-            { $limit: parsedLimit }
-          ],
-          total: [
-            { $count: 'total' }
-          ]
-        }
-      }
-    );
-
-    const result = await this.userModel.aggregate(pipeline).exec();
-
-    return { users: result[0].users, total: result[0].total.length ? result[0].total[0].total : 0 };
+  
+    const users = await this.userModel
+      .find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+  
+    const total = await this.userModel.countDocuments(query).exec();
+  
+    return { users, total };
   }
+  
+  
+  
+
+formatDate(date: Date): string {
+    if (!date) {
+        return '';
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ email }).exec();
     return user || null; 
   }
 
-  private formatDate(date: Date): string {
-    if (!date) {
-      return ''; 
-    }
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const day = String(date.getDate()).padStart(2, '0'); 
-    return `${year}-${month}-${day}`;
-  }
+
 }

@@ -17,27 +17,29 @@ export class UsersController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
-
-  @Get()
+// http://localhost:3000/user?startDate=&endDate=2024-03-25
+@Get()
   async getAllUsers(
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
+    @Query('startDate') startDate: string | undefined,
+    @Query('endDate') endDate: string | undefined,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ): Promise<{ users: User[], total: number }> {
     try {
-      let fromDateObj: Date | null = null;
-      let toDateObj: Date | null = null;
+      let fromDate: Date | null = null;
+      let toDate: Date | null = null;
 
-      if (fromDate) {
-        fromDateObj = new Date(fromDate);
+      if (startDate) {
+        fromDate = new Date(startDate);
       }
 
-      if (toDate) {
-        toDateObj = new Date(toDate);
+      if (endDate) {
+        toDate = new Date(endDate);
       }
 
-      const { users, total } = await this.usersService.findAllUsers(page, limit, fromDateObj, toDateObj);
+      console.log(fromDate, toDate, 'From controller');
+
+      const { users, total } = await this.usersService.findAllUsers(page, limit, fromDate, toDate);
       return { users, total };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
