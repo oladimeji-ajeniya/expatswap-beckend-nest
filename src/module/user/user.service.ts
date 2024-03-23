@@ -29,12 +29,15 @@ export class UsersService {
 
     const parsedLimit = parseInt(limit, 10);
 
-    if (fromDate && toDate) {
-      pipeline.push({ $match: { dateOfBirth: { $gte: fromDate, $lte: toDate } } });
-    } else if (fromDate) {
-      pipeline.push({ $match: { dateOfBirth: { $gte: fromDate } } });
-    } else if (toDate) {
-      pipeline.push({ $match: { dateOfBirth: { $lte: toDate } } });
+    const formattedFromDate = this.formatDate(fromDate); // Format fromDate
+    const formattedToDate = this.formatDate(toDate); // Format toDat
+
+    if (formattedFromDate && formattedToDate) {
+      pipeline.push({ $match: { dateOfBirth: { $gte: formattedFromDate, $lte: formattedToDate } } });
+    } else if (formattedFromDate) {
+      pipeline.push({ $match: { dateOfBirth: { $gte: formattedFromDate } } });
+    } else if (formattedToDate) {
+      pipeline.push({ $match: { dateOfBirth: { $lte: formattedToDate } } });
     }
 
     pipeline.push(
@@ -58,5 +61,12 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ email }).exec();
     return user || null; 
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two digits for month
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits for day
+    return `${year}-${month}-${day}`;
   }
 }
