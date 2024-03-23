@@ -43,4 +43,14 @@ export class UsersController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Get('exists')
+  async userExists(@Query('email') email: string): Promise<{ exists: boolean }> {
+    try {
+      const user = await this.usersService.findByEmail(email);
+      return { exists: !!user }; // Return true if user exists, false otherwise
+    } catch (error) {
+      throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

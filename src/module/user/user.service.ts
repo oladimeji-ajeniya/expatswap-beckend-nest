@@ -23,8 +23,11 @@ export class UsersService {
     }
   }
 
-  async findAllUsers(page: number = 1, limit: number = 10, fromDate: Date = null, toDate: Date = null): Promise<{ users: any[], total: number }> {
+
+  async findAllUsers(page: number = 1, limit: any = 10, fromDate: Date = null, toDate: Date = null): Promise<{ users: any[], total: number }> {
     const pipeline = [];
+
+    const parsedLimit = parseInt(limit, 10);
 
     if (fromDate && toDate) {
       pipeline.push({ $match: { dateOfBirth: { $gte: fromDate, $lte: toDate } } });
@@ -37,8 +40,8 @@ export class UsersService {
     pipeline.push(
       { $facet: {
           users: [
-            { $skip: (page - 1) * limit },
-            { $limit: limit }
+            { $skip: (page - 1) * parsedLimit },
+            { $limit: parsedLimit }
           ],
           total: [
             { $count: 'total' }
@@ -60,5 +63,3 @@ export class UsersService {
     return user;
   }
 }
-
-

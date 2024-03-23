@@ -1,6 +1,5 @@
 // create-user.dto.ts
 import { IsString, IsNotEmpty, IsEmail, MinLength, MaxLength, Matches } from 'class-validator';
-import { IsUnique } from 'src/validators/is-unique.validator';
 
 export class CreateUserDto {
   @IsString()
@@ -30,8 +29,5 @@ export class CreateUserDto {
   password: string;
 
   @IsNotEmpty()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'Date must be in YYYY-MM-DD format',
-  })
   dateOfBirth: string | Date;
 }
